@@ -1,0 +1,166 @@
+<html>
+    <head>
+      <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarPooling</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,1) 100%);
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .btn_custom {
+            padding: 0.6em 2em;
+            border: none;
+            outline: none;
+            color: rgb(255, 255, 255);
+            background: #111;
+            cursor: pointer;
+            position: relative;
+            z-index: 0;
+            border-radius: 10px;
+            margin: 0.5em;
+            display: inline-block;
+        }
+
+        .btn_custom:before {
+            content: "";
+            background: linear-gradient(
+                45deg,
+                #ff0000,
+                #ff7300,
+                #fffb00,
+                #48ff00,
+                #00ffd5,
+                #002bff,
+                #7a00ff,
+                #ff00c8,
+                #ff0000
+            );
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            background-size: 400%;
+            z-index: -1;
+            filter: blur(5px);
+            width: calc(100% + 4px);
+            height: calc(100% + 4px);
+            animation: glowingbtn 20s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            border-radius: 10px;
+        }
+
+        @keyframes glowingbtn {
+            0% {
+                background-position: 0 0;
+            }
+            50% {
+                background-position: 400% 0;
+            }
+            100% {
+                background-position: 0 0;
+            }
+        }
+
+        .btn_custom:active {
+            color: #000;
+        }
+
+        .btn_custom:active:after {
+            background: transparent;
+        }
+
+        .btn_custom:hover:before {
+            opacity: 1;
+        }
+
+        .text-right {
+            text-align: right;
+        }
+
+        .title {
+            font-weight: bold;
+            color: #ff7300;
+        }
+
+        .highlight {
+            color: #ff0000;
+        }
+
+        .btn {
+            margin-right: 5px;
+        }
+    </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+      
+        <!-- Web3.js-->
+      <script src="node_modules/web3.js-browser/build/web3.js"></script>
+      <script src="node_modules/web3/dist/web3.min.js"></script>
+      <script src="web3connection.js"></script> 
+      <link rel="stylesheet" href="style.css" />
+
+    <script>
+    var hashcode="";
+    $(document).ready(function(){
+
+          var hashcode=Cookies.get('hashcodecp');
+          var username=Cookies.get('usernamecp');  
+
+           $("#uname").html(username); 
+           $("#hcode").html(hashcode);
+           //balance View
+web3.eth.getBalance(hashcode).then(function(rvalue){
+                rvalue=web3.utils.fromWei(rvalue,"ether");
+               $("#balance").html(rvalue + "ETH"); 
+
+            })
+            var totalrides=0;
+           //reading of Query String
+            var param=new URLSearchParams(window.location.search);
+            var phc=param.get("personhashcode");
+            
+
+          
+            myContract.methods.getUserDetails(phc).call().then(
+						function(returnarray){
+							
+                                 var obj=returnarray;       
+                                 var output= "Details:  <ul>";
+                                 output=output + "<li><span class=title>Name</span>:" + obj[0] + "</li>";     
+                                 output=output + "<li><span class=title>Contact No</span>:" + obj[1] + "</li>";
+                                 output=output + "<li><span class=title>Email</span>:<a href='mailto:" + obj[2] + "' target=blank>"+ obj[2] +"</li>";
+                                 output=output + "</ul>";
+                                 $("#persondetails").append(output);       
+                                
+
+
+    						}
+							);
+    });
+
+    </script>
+
+    </head>
+    <body>
+      <div class="container mt-5">
+          <h1>P2P CARPOOLING</h1>
+          <hr />
+          <div>User <span id="uname"></span></div>
+          <div>Account ID : <span id="hcode"></span></div>
+          <div>Account Balance: <span id="balance"></span></div>
+          <hr />
+          <div class="text-right">
+              <a href="userdashboardpanelchoice.html" class="btn btn_custom">Dashboard</a>
+          </div>
+          <h4 class="mt-4">Person Details</h4>
+          <div id="persondetails"></div>
+      </div>
+      <!-- Bootstrap JS -->
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  </body>
+</html>

@@ -1,0 +1,28 @@
+.title{
+    width: 200px;
+    display: inline-block;
+}
+
+.highlight
+{
+    color:red !important;
+    background-color: lightyellow !important;
+}
+.btn, .btn_logout
+{
+background-color: antiquewhite;
+border:black solid 1px;
+width:150px;
+display: inline-block;
+margin-left: 20px;
+padding: 5px;
+border-radius: 5px;
+text-align: center;
+text-decoration: none;
+}
+
+.btn_logout
+{
+background-color:black !important;
+color: white;
+}

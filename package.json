@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "web3": "^4.8.0",
+    "web3.js-browser": "^0.2.0"
+  }
+}

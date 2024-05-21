@@ -1,0 +1,253 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>CarPooling - Search Rides</title>
+        <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <style>
+            body {
+                background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,1) 100%);
+                color: white;
+            }
+    
+            .btn_custom {
+                padding: 0.6em 2em;
+                border: none;
+                outline: none;
+                color: rgb(255, 255, 255);
+                background: #111;
+                cursor: pointer;
+                position: relative;
+                z-index: 0;
+                border-radius: 10px;
+                margin: 0.5em;
+                display: inline-block;
+            }
+    
+            .btn_custom:before {
+                content: "";
+                background: linear-gradient(
+                    45deg,
+                    #ff0000,
+                    #ff7300,
+                    #fffb00,
+                    #48ff00,
+                    #00ffd5,
+                    #002bff,
+                    #7a00ff,
+                    #ff00c8,
+                    #ff0000
+                );
+                position: absolute;
+                top: -2px;
+                left: -2px;
+                background-size: 400%;
+                z-index: -1;
+                filter: blur(5px);
+                width: calc(100% + 4px);
+                height: calc(100% + 4px);
+                animation: glowingbtn 20s linear infinite;
+                opacity: 0;
+                transition: opacity 0.3s ease-in-out;
+                border-radius: 10px;
+            }
+    
+            @keyframes glowingbtn {
+                0% {
+                    background-position: 0 0;
+                }
+                50% {
+                    background-position: 400% 0;
+                }
+                100% {
+                    background-position: 0 0;
+                }
+            }
+    
+            .btn_custom:active {
+                color: #000;
+            }
+    
+            .btn_custom:active:after {
+                background: transparent;
+            }
+    
+            .btn_custom:hover:before {
+                opacity: 1;
+            }
+    
+            .btn_logout {
+                background-color: red;
+                color: white;
+                border: none;
+                padding: 0.6em 2em;
+                text-decoration: none;
+                border-radius: 5px;
+                margin: 0.5em;
+            }
+    
+            #balance {
+                font-weight: bold;
+            }
+    
+            fieldset {
+                border: 2px solid white;
+                padding: 20px;
+                border-radius: 10px;
+            }
+    
+            legend {
+                border: none;
+                font-size: 1.5em;
+                padding: 0 10px;
+            }
+    
+            .title {
+                font-weight: bold;
+            }
+    
+            .highlight {
+                color: #ff7300;
+            }
+    
+            .result-ride {
+                margin-top: 20px;
+            }
+    
+            .result-ride hr {
+                border: 1px solid #555;
+            }
+        </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+      
+        <!-- Web3.js-->
+      <script src="node_modules/web3.js-browser/build/web3.js"></script>
+      <script src="node_modules/web3/dist/web3.min.js"></script>
+      <script src="web3connection.js"></script> 
+      <link rel="stylesheet" href="style.css" />
+
+    <script>
+    var hashcode="";
+    $(document).ready(function(){
+
+          var hashcode=Cookies.get('hashcodecp');
+          var username=Cookies.get('usernamecp');  
+          
+          
+
+           $("#uname").html(username); 
+           $("#hcode").html(hashcode);
+           //balance View
+web3.eth.getBalance(hashcode).then(function(rvalue){
+                rvalue=web3.utils.fromWei(rvalue,"ether");
+               $("#balance").html(rvalue + "ETH"); 
+
+            })
+           //reading
+
+           $("#btn_search").click(function(){
+
+             var arghfrom=$("#hfrom").val();
+             var arghto=$("#hto").val();   
+             var hashcode=Cookies.get('hashcodecp');
+
+            myContract.methods.searchByLocation(hashcode, arghfrom , arghto ).call().then(
+						function(returnarray){
+							var index=0;
+                            var totalrides=returnarray[1];
+
+                             if(totalrides==0)
+                             {
+                                $("#ridecount").html("<font color=red>Sorry No Ride Found</font>");
+                                $("#ridedetails").html(""); 
+                             }   
+                            else
+                            {
+                                $("#ridecount").html("<font color=green>Total Rides Found: " + totalrides + "</font>");  
+                            }
+
+                               var rideno=1; 
+                            while(index<totalrides)
+                                {
+                                 var obj=returnarray[0][index];       
+                                 var output= "Ride " + rideno +" <ul>";
+                                 output=output + "<li><span class=title>Heading From</span>:" + obj[2] + "</li>";     
+                                 output=output + "<li><span class=title>Heading To</span>:" + obj[3] + "</li>";
+                                 output=output + "<li><span class=title>Ride Date</span>:" + obj[4] + "</li>";
+                                 output=output + "<li><span class=title>Ride Time</span>:" + obj[5] + "</li>";
+                                 output=output + "<li><span class=title>Ride Charges</span>:" + obj[6] + " Eth</li>";
+                                 output=output + "<li><span class=title>Number of Persons</span>:" + obj[7] + "</li>";
+                                 output=output + "<li><span class=title>VType</span>:" + obj[9] + "</li>";
+
+                                 var status=obj[12];   
+                                  
+                                   if(status==true)     
+                                   {
+                                    output=output + "<li><span class=title>Ride Status</span>:Active</li>";
+                                
+                                   }
+                                   else
+                                   {
+                                    output=output + "<li><span class=title>Ride Status</span>: Cancelled</li>";
+                                   }
+                                 output=output + "</ul>";
+
+                                var uhc=obj[1];
+            
+                                 output=output + "<a class=btn href='viewPersonDetails.html?rideno=" +obj[0] + "&personhashcode=" + uhc +"'><font color=green>Person Details</font></a>";
+                                 output=output + "<a class=btn href='mapRideBooking.html?rideno=" +obj[0] + "'><font color=green>Book My Ride</font></a>";
+                                  
+                                 output=output + "<hr />";
+                                 $("#ridedetails").append(output);       
+                                 index++;
+                                 rideno++;
+                                }
+
+
+    						}
+							);
+
+           });
+            
+    });
+
+    </script>
+
+    </head>
+    <body>
+        <div class="container mt-5">
+            <h1 class="text-center mb-4" style="font-family: 'Arial', sans-serif;"><span style="color: #ff7300;">P2P CARPOOLING - Search Rides</span></h1>
+            <hr />
+            <div class="mb-3">
+                <div>User: <span id="uname"></span></div>
+                <div>Account ID: <span id="hcode"></span></div>
+                <div>Account Balance: <span id="balance"></span></div>
+            </div>
+            <div class="text-right mb-3">
+                <a class="btn_custom" href="dashboardpassenger.html">DashBoard</a>
+            </div>
+            <hr />
+            <fieldset>
+                <legend>Search By LOCATION</legend>
+                <form>
+                    <div class="form-group">
+                        <label class="title">Heading From</label>
+                        <input type="text" id="hfrom" class="form-control" placeholder="Write Here" />
+                    </div>
+                    <div class="text-center mb-3">OR</div>
+                    <div class="form-group">
+                        <label class="title">Heading To</label>
+                        <input type="text" id="hto" class="form-control" placeholder="Write Here" />
+                    </div>
+                    <div class="form-group text-center">
+                        <input type="button" id="btn_search" class="btn_custom" value="Search Now" />
+                    </div>
+                </form>
+            </fieldset>
+            <h4 class="mt-4">Ride Details - <span id="ridecount"></span></h4>
+            <div id="ridedetails"></div>
+        </div>
+
+    </body>
+</html>

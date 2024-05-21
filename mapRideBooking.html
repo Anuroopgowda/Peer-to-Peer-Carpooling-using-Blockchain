@@ -1,0 +1,219 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarPooling - Passenger Panel</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,1) 100%);
+            color: white; /* Set text color to white for better visibility */
+        }
+
+        .btn_custom, .btn_logout {
+            padding: 0.6em 2em;
+            border: none;
+            outline: none;
+            color: rgb(255, 255, 255);
+            background: #111;
+            cursor: pointer;
+            position: relative;
+            z-index: 0;
+            border-radius: 10px;
+            margin: 0.5em;
+            display: inline-block;
+        }
+
+        .btn_custom:before, .btn_logout:before {
+            content: "";
+            background: linear-gradient(
+                45deg,
+                #ff0000,
+                #ff7300,
+                #fffb00,
+                #48ff00,
+                #00ffd5,
+                #002bff,
+                #7a00ff,
+                #ff00c8,
+                #ff0000
+            );
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            background-size: 400%;
+            z-index: -1;
+            filter: blur(5px);
+            width: calc(100% + 4px);
+            height: calc(100% + 4px);
+            animation: glowingbtn 20s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            border-radius: 10px;
+        }
+
+        @keyframes glowingbtn {
+            0% {
+                background-position: 0 0;
+            }
+            50% {
+                background-position: 400% 0;
+            }
+            100% {
+                background-position: 0 0;
+            }
+        }
+
+        .btn_custom:active, .btn_logout:active {
+            color: #000;
+        }
+
+        .btn_custom:active:after, .btn_logout:active:after {
+            background: transparent;
+        }
+
+        .btn_custom:hover:before, .btn_logout:hover:before {
+            opacity: 1;
+        }
+
+        ol {
+            padding-left: 1.2em;
+        }
+
+        ol li {
+            margin-bottom: 1em;
+        }
+
+        ol li a {
+            display: inline-block;
+        }
+
+        .highlight {
+            color: #ff7300;
+        }
+    </style>
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+      
+        <!-- Web3.js-->
+      <script src="node_modules/web3.js-browser/build/web3.js"></script>
+      <script src="node_modules/web3/dist/web3.min.js"></script>
+      <script src="web3connection.js"></script> 
+      <link rel="stylesheet" href="style.css" />
+
+      <script>
+        var hashcode="";
+        $(document).ready(function(){
+    
+              var hashcode=Cookies.get('hashcodecp');
+              var username=Cookies.get('usernamecp');  
+    
+               $("#uname").html(username); 
+               $("#hcode").html(hashcode);
+               //balance View
+web3.eth.getBalance(hashcode).then(function(rvalue){
+                rvalue=web3.utils.fromWei(rvalue,"ether");
+               $("#balance").html(rvalue + "ETH"); 
+
+            })
+                var totalrides=0;
+               //reading of Query String
+                var param=new URLSearchParams(window.location.search);
+                var rideno=param.get("rideno");
+                
+    
+              
+                myContract.methods.searchView(rideno).call().then(
+                            function(returnarray){
+                                
+                                     var obj=returnarray;       
+                                     var output= "<ul>";
+                                     output=output + "<li><span class=title>Heading From</span>:" + obj[1] + "</li>";     
+                                     output=output + "<li><span class=title>Heading To</span>:" + obj[2] + "</li>";
+                                     output=output + "<li><span class=title>Ride Date</span>:" + obj[3] + "</li>";
+                                     output=output + "<li><span class=title>Ride Time</span>:" + obj[4] + "</li>";
+                                     output=output + "<li><span class=title>Ride Charges</span>:" + obj[5] + " Eth</li>";
+                                     output=output + "<li><span class=title>Number of Persons</span>:" + obj[6] + "</li>";
+                                     output=output + "<li ><span class='title highlight'>Current Booking Status</span>:" + obj[7] + "</li>";
+                                     output=output + "<li><span class=title>VType</span>:" + obj[8] + "</li>";
+                                     output=output + "</ul>";
+                                     //action
+                                     $("#ridedetails").append(output);       
+                                    
+                                     $("#ridecharges").val(obj[5]);   
+    
+                                });
+
+                                $("#btn_action").click(function(){
+
+                                    //var hashcode=Cookies.get('hashcodecp');
+                                    var param=new URLSearchParams(window.location.search);
+                                    var rideno=param.get("rideno");
+                                    //var charges = $("#ridecharges").val();
+                                    var nop = $("#nop").val();
+                                    
+                                    myContract.methods.RideNOPStatus(rideno,nop).call().then(
+                                                    function(returnstatus){
+                                                    
+                                                    if(returnstatus==true)
+                                                    {
+                                                        var hashcode=Cookies.get('hashcodecp');
+                                                        var param=new URLSearchParams(window.location.search);
+                                                        var rideno=param.get("rideno");
+                                                        var charges = $("#ridecharges").val();
+                                                        var nop = $("#nop").val();
+                                                        
+                                                    myContract.methods.MapRideBooking(rideno,hashcode,nop,charges).send({from : hashcode, gas : '3000000'});
+                                                    $("#msg").html("<font color=green>Booking has been saved Successfully!!!</font>");
+                                                    }
+                                                    else
+                                                    {
+                                                        alert("Invalid Passenger Count...");
+                                                    }
+                                                
+                                                    });
+                                });
+
+        });
+    
+        </script>  
+
+    </head>
+    <body>
+        <div class="container mt-5">
+            <h1 class="text-center mb-4" style="font-family: 'Arial', sans-serif;"><span style="color: #ff7300;">P2P CARPOOLING - Passenger Panel</span></h1>
+            
+            <div>
+                <div class="mb-3">
+                    <div>Welcome <span id="uname"></span></div>
+                    <div>Account ID: <span id="hcode"></span></div>
+                    <div>Account Balance: <span id="balance"></span></div>
+                </div>
+                <hr />
+                <div class="text-right mb-3">
+                    <a class="btn_custom" href="userdashboardpanelchoice.html">Dashboard</a>
+                </div>
+                <h4>Ride Details-<span id="ridecount"></span></h4>
+                <div>
+                    <span id="ridedetails"></span>
+                </div>
+                <fieldset>
+                    <legend><h4>Booking Details</h4></legend>
+                    <form>
+                        <div class="form-group">
+                            <label for="nop" class="title">No of Passengers</label>
+                            <input type="text" id="nop" class="form-control" placeholder="Write Here" />
+                            <input type="hidden" id="ridecharges" />
+                        </div>
+                        <div class="form-group">
+                            <input type="button" id="btn_action" class="btn_custom" value="Book Now" />
+                        </div>
+                        <div>
+                            <span id="msg"></span>
+                        </div>
+                    </form>
+                </fieldset>
+            </div>
+        </div>
+    </body>
+</html>

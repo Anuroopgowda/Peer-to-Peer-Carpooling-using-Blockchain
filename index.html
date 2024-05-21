@@ -1,0 +1,229 @@
+<html>
+<head>
+
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CarPooling - Login Panel</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+    background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,1) 100%);
+    color: white; /* Set text color to white for better visibility */
+}
+
+.bn5 {
+  padding: 0.6em 2em;
+  border: none;
+  outline: none;
+  color: rgb(255, 255, 255);
+  background: #111;
+  cursor: pointer;
+  position: relative;
+  z-index: 0;
+  border-radius: 10px;
+}
+
+.bn5:before {
+  content: "";
+  background: linear-gradient(
+    45deg,
+    #ff0000,
+    #ff7300,
+    #fffb00,
+    #48ff00,
+    #00ffd5,
+    #002bff,
+    #7a00ff,
+    #ff00c8,
+    #ff0000
+  );
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  background-size: 400%;
+  z-index: -1;
+  filter: blur(5px);
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  animation: glowingbn5 20s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+  border-radius: 10px;
+}
+
+@keyframes glowingbn5 {
+  0% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: 400% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+.bn5:active {
+  color: #000;
+}
+
+.bn5:active:after {
+  background: transparent;
+}
+
+.bn5:hover:before {
+  opacity: 1;
+} 
+body {
+            background-image: url('OIP.jpeg');
+            background-size: cover; /* Cover the entire background */
+            background-repeat: no-repeat; /* Prevent the image from repeating */
+            background-position: center center; /* Center the image horizontally and vertically */
+            /* Add any other styles you want for the body */
+            color: #ffffff; /* Text color */
+            font-family: Arial, sans-serif; /* Font family */
+        }
+        h1 {
+            color: #333;
+            font-family: 'Arial Black', sans-serif;
+            font-size: 48px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+            text-shadow: 2px 2px 0 #fff, /* top-left */
+                         -2px 2px 0 #fff, /* top-right */
+                          2px -2px 0 #fff, /* bottom-left */
+                         -2px -2px 0 #fff; /* bottom-right */
+        }
+
+    </style>
+
+
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+  
+    <!-- Web3.js-->
+  <script src="node_modules/web3.js-browser/build/web3.js"></script>
+  <script src="node_modules/web3/dist/web3.min.js"></script>
+  <script src="web3connection.js"></script> 
+  <link rel="stylesheet" href="style.css" />
+    <script>
+
+        $(document).ready(function(){
+           
+                                  
+            $("#btn_action").click(function(){
+        
+                //Cookies.set()
+                //alert("working");
+
+                var hashcode=$("#hashaddressdp").val();
+				
+				myContract.methods.loginPanel(hashcode).call().then(
+						function(returndata){
+							if(returndata[1]==1)
+							{
+								uname=returndata[0];
+								Cookies.set('hashcodecp',hashcode,{expires : 14});
+                				Cookies.set('usernamecp',uname,{expires : 14});
+        				        window.location.replace('dashboard.html');
+							}	
+							else{
+								alert("User Account Not Found");
+							}
+
+    						}
+							);
+	
+                
+        
+            });
+        
+            $("#btn_action2").click(function(){
+        
+        //Cookies.set()
+        //alert("working");
+
+        var hashcode=$("#hashaddresspp").val();
+        
+        myContract.methods.loginPanel(hashcode).call().then(
+                function(returndata){
+                    if(returndata[1]==1)
+                    {
+                        uname=returndata[0];
+                        Cookies.set('hashcodecp',hashcode,{expires : 14});
+                        Cookies.set('usernamecp',uname,{expires : 14});
+                        window.location.replace('dashboardpassenger.html');
+                    }	
+                    else{
+                        alert("User Account Not Found");
+                    }
+
+                    }
+                    );
+
+        
+
+    });
+
+        });
+        
+        
+        </script>
+
+
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>P2P CARPOOLING</h1>
+       
+        <div class="text-right mb-3">
+            <a href='newuser.html' class="bn5">New User</a>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <fieldset>
+                    <legend>User - Driver Panel</legend>
+                    <form id="form1">
+                        <div class="form-group">
+                            <label for="hashaddressdp">User Address</label>
+                            <input type="text" class="form-control" id="hashaddressdp" placeholder="Write Here">
+                        </div>
+                        <button type="button" class="bn5" id="btn_action">Log-in as Driver</button>
+                    </form>
+                </fieldset>
+            </div>
+            <div class="col-md-6">
+                <fieldset>
+                    <legend>User - Passenger Panel</legend>
+                    <form id="form2">
+                        <div class="form-group">
+                            <label for="hashaddresspp">User Address</label>
+                            <input type="text" class="form-control" id="hashaddresspp" placeholder="Write Here">
+                        </div>
+                        <button type="button" class="bn5" id="btn_action2">Log-in as Passenger</button>
+                    </form>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- Your custom JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+    <script src="node_modules/web3.js-browser/build/web3.js"></script>
+    <script src="node_modules/web3/dist/web3.min.js"></script>
+    <script src="web3connection.js"></script>
+    <script>
+        // Your JavaScript code
+    </script>
+</body>
+
+</html>

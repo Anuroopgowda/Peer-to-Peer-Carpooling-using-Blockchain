@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Maps Directions with Distance</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Custom styling */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(to bottom, #000000, #434343);
+            color: white;
+        }
+        #map {
+            height: 500px;
+            width: 100%;
+        }
+        .controls {
+            margin: 20px;
+        }
+        .container-custom {
+            display: flex;
+            flex-direction: column;
+            flex-wrap: nowrap;
+        }
+        .form-map-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: nowrap;
+        }
+        .form-container, .map-container {
+            flex: 1;
+            margin: 10px;
+        }
+        .form-control, .btn, .bn5, .btn_logout {
+            background-color: #333;
+            color: white;
+            border: 1px solid #555;
+        }
+        .text-black {
+        color: black !important;
+    }
+        .bn5, .btn_logout {
+            padding: 0.6em 2em;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            position: relative;
+            z-index: 0;
+            border-radius: 10px;
+            margin: 0.5em;
+            display: inline-block;
+        }
+        .bn5:before, .btn_logout:before {
+            content: "";
+            background: linear-gradient(
+                45deg,
+                #ff0000,
+                #ff7300,
+                #fffb00,
+                #48ff00,
+                #00ffd5,
+                #002bff,
+                #7a00ff,
+                #ff00c8,
+                #ff0000
+            );
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            background-size: 400%;
+            z-index: -1;
+            filter: blur(5px);
+            width: calc(100% + 4px);
+            height: calc(100% + 4px);
+            animation: glowingbn5 20s linear infinite;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            border-radius: 10px;
+        }
+        @keyframes glowingbn5 {
+            0% {
+                background-position: 0 0;
+            }
+            50% {
+                background-position: 400% 0;
+            }
+            100% {
+                background-position: 0 0;
+            }
+        }
+        .bn5:active, .btn_logout:active {
+            color: #000;
+        }
+        .bn5:active:after, .btn_logout:active:after {
+            background: transparent;
+        }
+        .bn5:hover:before, .btn_logout:hover:before {
+            opacity: 1;
+        }
+        ol {
+            padding-left: 1.2em;
+        }
+        ol li {
+            margin-bottom: 1em;
+        }
+        ol li a {
+            display: inline-block;
+        }
+    </style>
+    <script src="https://maps.googleapis.com/maps/api/js?key=API_KEY&libraries=places"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.5/dist/js.cookie.min.js"></script>
+    <script src="node_modules/web3.js-browser/build/web3.js"></script>
+    <script src="node_modules/web3/dist/web3.min.js"></script>
+    <script src="web3connection.js"></script>
+    <script>
+        var hashcode = "";
+        $(document).ready(function() {
+            var hashcode = Cookies.get('hashcodecp');
+            var username = Cookies.get('usernamecp');
+
+            $("#uname").html(username);
+            $("#hcode").html(hashcode);
+
+            //balance View
+            web3.eth.getBalance(hashcode).then(function(rvalue) {
+                rvalue = web3.utils.fromWei(rvalue, "ether");
+
+                $("#balance").html(rvalue + "ETH");
+            });
+        });
+
+        let map, directionsService, directionsRenderer;
+
+        function initMap() {
+            directionsService = new google.maps.DirectionsService();
+            directionsRenderer = new google.maps.DirectionsRenderer();
+            map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: -34.397, lng: 150.644 },
+                zoom: 8
+            });
+            directionsRenderer.setMap(map);
+        }
+
+        function calculateAndDisplayRoute() {
+            const source = document.getElementById('hfrom').value;
+            const destination = document.getElementById('hto').value;
+
+            directionsService.route(
+                {
+                    origin: source,
+                    destination: destination,
+                    travelMode: google.maps.TravelMode.DRIVING
+                },
+                (response, status) => {
+                    if (status === 'OK') {
+                        directionsRenderer.setDirections(response);
+                        const route = response.routes[0];
+                        const distance = parseFloat(route.legs[0].distance.text.replace(' km', '').replace(',', '')); // Extracting distance in km and removing commas
+                        const rcharges = distance * 0.5; // Calculating ride price
+                        document.getElementById('distance').value = `Distance: ${distance} km`;
+                        document.getElementById('rcharges').value = `${rcharges.toFixed(0)}`; // Displaying price with zero decimal places
+                    } else {
+                        window.alert('Directions request failed due to ' + status);
+                    }
+                }
+            );
+        }
+
+        window.onload = initMap;
+    </script>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="container-custom">
+            <div class="form-container">
+                <div class="controls">
+                    <h1 class="text-center mb-4" style="font-family: 'Arial', sans-serif;"><span style="color: #ff7300;">P2P CARPOOLING</span></h1>
+                    <hr />
+                    <div class="mb-3">
+                        <div>User Name: <span id="uname"></span></div>
+                        <div>Account ID: <span id="hcode"></span></div>
+                        <div>Account Balance: <span id="balance"></span></div>
+                    </div>
+                    <div class="text-right mb-3">
+                        <a class="bn5" href="dashboard.html">Dashboard</a>
+                    </div>
+                    <hr />
+                    <h3>Publish Your RIDE <span id="msg"></span></h3>
+                    <div class="form-map-container">
+                        <div class="form-container">
+                            <div class="form-group">
+                                <label for="hfrom" class="title">Heading From</label>
+                                <input type="text" id="hfrom" class="form-control" placeholder="Write Here" />
+                            </div>
+                            <div class="form-group">
+                                <label for="hto" class="title">Heading To</label>
+                                <input type="text" id="hto" class="form-control" placeholder="Write Here" />
+                            </div>
+
+                            <button class="bn5" onclick="calculateAndDisplayRoute()">Get Distance and price</button>
+                            <input id="distance" type="text" class="form-control text-black" readonly />
+                            <div class="form-group mt-2">
+                                <label for="rcharges" class="title">Ride Charges</label>
+                                <input id="rcharges" type="text" class="form-control text-black" readonly />
+                            </div>
+
+                            <div class="form-group">
+                                <label for="rdate" class="title">Ride Date</label>
+                                <input type="date" id="rdate" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label for="rtime" class="title">Ride Time</label>
+                                <input type="time" id="rtime" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label for="rnop" class="title">Number of Person</label>
+                                <input type="number" id="rnop" class="form-control" />
+                            </div>
+                            <div class="form-group">
+                                <label for="vtype" class="title">Vehicle Type</label>
+                                <select id="vtype" class="form-control">
+                                    <option value="2 Wheeler">2 Wheeler</option>
+                                    <option value="4 Wheeler">4 Wheeler</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <input type="button" id="btn_submit" class="bn5" value="Publish My Ride" />
+                            </div>
+                        </div>
+                        <div class="map-container">
+                            <div id="map"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $("#btn_submit").click(function() {
+                var hashcode = Cookies.get('hashcodecp');
+                var headingfrom = $("#hfrom").val();
+                var headingto = $("#hto").val();
+                var ridedate = $("#rdate").val();
+                var ridetime = $("#rtime").val();
+                var nop = $("#rnop").val();
+                var rideamount = $("#rcharges").val();
+                var vehicletype = $("#vtype").val();
+
+                myContract.methods.AddRide(hashcode, headingfrom, headingto, ridedate, ridetime, rideamount, nop, vehicletype).send({ from: hashcode, gas: '3000000' });
+
+                $("#msg").html("<br /><font color=green>Your Ride has been activated!!!</font>");
+            });
+        });
+    </script>
+</body>
+</html>
+
