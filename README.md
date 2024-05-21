@@ -11,6 +11,9 @@ SCREENSHOTS
 
 ![image](https://github.com/Anuroopgowda/Peer-to-Peer-Carpooling-using-Blockchain/assets/118721095/b93e9808-e089-423e-a2a3-c7e4e6ce68e4)
 
+STEPS TO RUN THIS PROJECT:
+
+
 
 
 
